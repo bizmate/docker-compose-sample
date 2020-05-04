@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/config/nginx.conf:/etc/nginx/nginx.conf:ro
+      - websrc:/var/www/html/:z
+    depends_on:
+      - php
+
+  php:
+    image: php:7.4-fpm
+    user: $UID
+    ports:
+      - "9000"
+    volumes:
+      - ./docker/config/php.ini:/usr/local/etc/php/php.ini
+      - websrc:/var/www/html/:z
+
+  curl:
+    image: curlimages/curl:7.70.0
+    user: $UID
+    volumes:
+      - ./docker/curl-entrypoint.sh:/code/curl-entrypoint.sh
+    entrypoint: /code/curl-entrypoint.sh
+
+volumes:
+  websrc:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: $PWD
